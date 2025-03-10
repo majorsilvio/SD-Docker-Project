@@ -1,0 +1,66 @@
+services:
+
+  node_db:
+    container_name: node_db
+    image: postgres:12
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=sistemas_db
+      - POSTGRES_USER=sistemas
+      - POSTGRES_PASSWORD=12345
+    volumes:
+      - node_db_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - app-network
+  redis:
+    container_name: node_redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "80:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./servers.json:/pgadmin4/servers.json
+    networks:
+      - app-network
+    depends_on:
+      - node_db
+
+  node_app:
+    container_name: node_app
+    build: .
+    image: node
+    ports:
+      - "3000:3000"
+    environment:
+      - PG_DB=sistemas_db
+      - PG_USER=sistemas
+      - PG_PASSWORD=12345
+      - PG_HOST=node_db
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    restart: always
+    depends_on:
+      - node_db
+      - redis
+      - pgadmin
+    networks:
+      - app-network
+
+volumes:
+  node_db_data: {}
+  pgadmin_data: {}
+networks:
+  app-network:

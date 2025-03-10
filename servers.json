@@ -1,0 +1,14 @@
+{
+    "Servers": {
+      "PostgreSQL": {
+        "Name": "Sistemas DB",
+        "Group": "Servers",
+        "Host": "node_db",
+        "Port": 5432,
+        "MaintenanceDB": "sistemas_db",
+        "Username": "sistemas",
+        "SSLMode": "prefer"
+      }
+    }
+  }
+  
