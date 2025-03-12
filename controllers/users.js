@@ -9,7 +9,7 @@ exports.getUsers = async (req, res, next) => {
     const users = await User.findAll();
     if (users) {
       // Store the result in Redis with an expiration time
-      await redis.setex(req.originalUrl, 300, JSON.stringify(users)); // Expires in 1 hour
+      await redis.setex(req.originalUrl, 60, JSON.stringify(users)); 
       res.status(200).json(users);
     }
   } catch (err) {
@@ -26,7 +26,7 @@ exports.getUser = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ message: "User not found!" });
     }
-    await redis.setex(req.originalUrl, 300, JSON.stringify(user));
+    await redis.setex(req.originalUrl, 60, JSON.stringify(user));
     res.status(200).json(user);
   } catch (err) {
     console.log(err);
@@ -39,6 +39,9 @@ exports.createUser = async (req, res, next) => {
   const { name, email } = req.body;
   try {
     const user = await User.create({ name, email });
+    console.log(req.originalUrl);
+    
+    await redis.del(req.originalUrl);
     res.status(201).json({ message: "User created successfully!", user });
   } catch (err) {
     console.log(err);
